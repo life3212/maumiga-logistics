@@ -3,11 +3,12 @@ from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
-from typing import List
+from typing import List, Dict, Tuple
 import openpyxl
 import os
 import shutil
 import secrets
+from collections import defaultdict
 
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="your-secret-key")
@@ -109,16 +110,26 @@ async def view_category(request: Request, category: str, start: str = "", end: s
     incoming_logs = [row for row in logs if str(row[1]).strip() == "입고" and in_range(str(row[0]))]
     outgoing_logs = [row for row in logs if str(row[1]).strip() == "출고" and in_range(str(row[0]))]
 
+    def group_logs(log_list: List[Tuple]) -> Dict[Tuple[str, str], List[Tuple]]:
+        grouped = defaultdict(list)
+        for row in log_list:
+            key = (str(row[0]), str(row[2]))  # 일자, 사유
+            grouped[key].append(row)
+        return dict(grouped)
+
+    grouped_incoming = group_logs(incoming_logs)
+    grouped_outgoing = group_logs(outgoing_logs)
+
     return templates.TemplateResponse(f"{category}.html", {
         "request": request,
         "category": category,
         "products": products,
-        "logs": logs,
-        "incoming_logs": incoming_logs,
-        "outgoing_logs": outgoing_logs,
+        "grouped_incoming": grouped_incoming,
+        "grouped_outgoing": grouped_outgoing,
         "msg": msg,
         "start": start,
-        "end": end
+        "end": end,
+        "username": username
     })
 
 @app.post("/{category}/add")
