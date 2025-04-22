@@ -68,7 +68,7 @@
         <a href="/logout" style="margin-left: 10px; color: red; font-size: 14px;">로그아웃</a>
     </div>
 
-    <h1>🎮️ 제품 수불부</h1>
+    <h1>🎞️ 제품 수불부</h1>
     <a href="/" class="home-button">🏠 홈으로 이동</a>
 
     <h2>✅ 시작 제품 등록</h2>
@@ -81,7 +81,7 @@
     <h3>📁 시작 제품 엘셀 업로드</h3>
     <form method="post" action="/product/upload-new" enctype="multipart/form-data">
         <input type="file" name="file" accept=".xlsx" required>
-        <button type="submit">시험 제품 업로드</button>
+        <button type="submit">신규 제품 업로드</button>
     </form>
     <a href="/download/product-template">📅 시작 제품 업로드 양식 다운로드 (.xlsx)</a>
 
@@ -117,17 +117,17 @@
     <h2>📅 입고 이력</h2>
     <form method="post" action="/product/record">
         <input type="text" name="date" placeholder="일자 (YYYY-MM-DD)" required>
-        <input type="text" name="reason" placeholder="입고체" required>
+        <input type="text" name="reason" placeholder="입고처" required>
         <input type="text" name="name" placeholder="입고 제품명" required>
         <input type="number" name="quantity" placeholder="입고 수량" required>
         <input type="hidden" name="action" value="입고">
         <button type="submit">입고 등록</button>
     </form>
 
-    <h2>📄 출고 이력</h2>
+    <h2>📤 출고 이력</h2>
     <form method="post" action="/product/record">
         <input type="text" name="date" placeholder="일자 (YYYY-MM-DD)" required>
-        <input type="text" name="reason" placeholder="출고체" required>
+        <input type="text" name="reason" placeholder="출고처" required>
         <input type="text" name="name" placeholder="출고 제품명" required>
         <input type="number" name="quantity" placeholder="출고 수량" required>
         <input type="hidden" name="action" value="출고">
@@ -137,7 +137,7 @@
     <h2>📁 입출고 이력 엘셀 업로드</h2>
     <form method="post" action="/product/upload" enctype="multipart/form-data">
         <input type="file" name="file" accept=".xlsx" required>
-        <button type="submit">엘셀 업로드</button>
+        <button type="submit">엑셀 업로드</button>
         {% if msg %}<p style="color: green">{{ msg }}</p>{% endif %}
     </form>
     <a href="/download/template">📅 입출고 업로드 양식 다운로드 (.xlsx)</a>
@@ -145,9 +145,11 @@
     <form method="post" action="/product/delete-selected-log" onsubmit="return confirm('선택한 이력을 삭제하시겠습니까?')">
         <h3>📋 입고 이력</h3>
         <table>
-            <tr><th>✔</th><th>일자</th><th>입고체</th><th>대표제품 외</th><th>수</th></tr>
+            <tr><th>✔</th><th>일자</th><th>입고처</th><th>대표제품 외</th><th>수</th></tr>
             {% for group_key, rows in grouped_incoming.items() %}
-            {% set date, reason = group_key.split('|') %}
+            {% set parts = group_key.split('|') %}
+            {% set date = parts[0] %}
+            {% set reason = parts[1] %}
             <tr onclick="toggleDetail('in{{ loop.index }}')" style="cursor:pointer; background:#eef;">
                 <td></td>
                 <td>{{ date }}</td>
@@ -169,9 +171,11 @@
 
         <h3>📋 출고 이력</h3>
         <table>
-            <tr><th>✔</th><th>일자</th><th>출고체</th><th>대표제품 외</th><th>수</th></tr>
+            <tr><th>✔</th><th>일자</th><th>출고처</th><th>대표제품 외</th><th>수</th></tr>
             {% for group_key, rows in grouped_outgoing.items() %}
-            {% set date, reason = group_key.split('|') %}
+            {% set parts = group_key.split('|') %}
+            {% set date = parts[0] %}
+            {% set reason = parts[1] %}
             <tr onclick="toggleDetail('out{{ loop.index }}')" style="cursor:pointer; background:#fee;">
                 <td></td>
                 <td>{{ date }}</td>
