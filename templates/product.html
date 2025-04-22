@@ -68,22 +68,22 @@
         <a href="/logout" style="margin-left: 10px; color: red; font-size: 14px;">로그아웃</a>
     </div>
 
-    <h1>📦 제품 수불부</h1>
+    <h1>🎮️ 제품 수불부</h1>
     <a href="/" class="home-button">🏠 홈으로 이동</a>
 
-    <h2>✅ 신규 제품 등록</h2>
+    <h2>✅ 시작 제품 등록</h2>
     <form method="post" action="/product/add">
         <input type="text" name="name" placeholder="제품명" required>
         <input type="number" name="quantity" placeholder="초기 수량" required>
         <button type="submit">등록</button>
     </form>
 
-    <h3>📁 신규 제품 엑셀 업로드</h3>
+    <h3>📁 시작 제품 엘셀 업로드</h3>
     <form method="post" action="/product/upload-new" enctype="multipart/form-data">
         <input type="file" name="file" accept=".xlsx" required>
-        <button type="submit">신규 제품 업로드</button>
+        <button type="submit">시험 제품 업로드</button>
     </form>
-    <a href="/download/product-template">📥 신규 제품 업로드 양식 다운로드 (.xlsx)</a>
+    <a href="/download/product-template">📅 시작 제품 업로드 양식 다운로드 (.xlsx)</a>
 
     <h3>🗑️ 제품 삭제</h3>
     <form method="post" action="/product/delete" onsubmit="return confirm('정말로 이 제품을 삭제하시겠습니까?')">
@@ -114,72 +114,96 @@
         {% endfor %}
     </table>
 
-    <h2>📥 입고 이력 등록</h2>
+    <h2>📅 입고 이력</h2>
     <form method="post" action="/product/record">
         <input type="text" name="date" placeholder="일자 (YYYY-MM-DD)" required>
-        <input type="text" name="reason" placeholder="입고처" required>
+        <input type="text" name="reason" placeholder="입고체" required>
         <input type="text" name="name" placeholder="입고 제품명" required>
         <input type="number" name="quantity" placeholder="입고 수량" required>
         <input type="hidden" name="action" value="입고">
         <button type="submit">입고 등록</button>
     </form>
 
-    <h2>📤 출고 이력 등록</h2>
+    <h2>📄 출고 이력</h2>
     <form method="post" action="/product/record">
         <input type="text" name="date" placeholder="일자 (YYYY-MM-DD)" required>
-        <input type="text" name="reason" placeholder="출고처" required>
+        <input type="text" name="reason" placeholder="출고체" required>
         <input type="text" name="name" placeholder="출고 제품명" required>
         <input type="number" name="quantity" placeholder="출고 수량" required>
         <input type="hidden" name="action" value="출고">
         <button type="submit">출고 등록</button>
     </form>
 
-    <h2>📑 입출고 이력 엑셀 업로드</h2>
+    <h2>📁 입출고 이력 엘셀 업로드</h2>
     <form method="post" action="/product/upload" enctype="multipart/form-data">
         <input type="file" name="file" accept=".xlsx" required>
-        <button type="submit">엑셀 업로드</button>
+        <button type="submit">엘셀 업로드</button>
         {% if msg %}<p style="color: green">{{ msg }}</p>{% endif %}
     </form>
-    <a href="/download/template">📥 입출고 업로드 양식 다운로드 (.xlsx)</a>
+    <a href="/download/template">📅 입출고 업로드 양식 다운로드 (.xlsx)</a>
 
     <form method="post" action="/product/delete-selected-log" onsubmit="return confirm('선택한 이력을 삭제하시겠습니까?')">
         <h3>📋 입고 이력</h3>
-        <div>
-            <label>시작일: <input type="date" name="start" value="{{ start }}"></label>
-            <label>종료일: <input type="date" name="end" value="{{ end }}"></label>
-            <button type="submit" formaction="/product">적용</button>
-        </div>
         <table>
-            <tr><th>✔</th><th>일자</th><th>입고처</th><th>입고제품</th><th>입고물량</th></tr>
-            {% for row in incoming_logs %}
-            <tr>
-                <td><input type="checkbox" name="logs" value="{{ row[0] }}|입고|{{ row[3] }}"></td>
-                <td>{{ row[0] }}</td>
-                <td>{{ row[2] }}</td>
-                <td>{{ row[3] }}</td>
-                <td>{{ row[4] }}</td>
+            <tr><th>✔</th><th>일자</th><th>입고체</th><th>대표제품 외</th><th>수</th></tr>
+            {% for group_key, rows in grouped_incoming.items() %}
+            {% set date, reason = group_key.split('|') %}
+            <tr onclick="toggleDetail('in{{ loop.index }}')" style="cursor:pointer; background:#eef;">
+                <td></td>
+                <td>{{ date }}</td>
+                <td>{{ reason }}</td>
+                <td>{{ rows[0][3] }} 외 {{ rows|length - 1 }}종</td>
+                <td>{{ rows|length }}</td>
+            </tr>
+            <tr id="detail-in{{ loop.index }}" style="display:none;">
+                <td colspan="5">
+                    <ul>
+                        {% for row in rows %}
+                        <li>{{ row[3] }} - {{ row[4] }}개</li>
+                        {% endfor %}
+                    </ul>
+                </td>
             </tr>
             {% endfor %}
         </table>
 
         <h3>📋 출고 이력</h3>
         <table>
-            <tr><th>✔</th><th>일자</th><th>출고처</th><th>출고제품</th><th>출고물량</th></tr>
-            {% for row in outgoing_logs %}
-            <tr>
-                <td><input type="checkbox" name="logs" value="{{ row[0] }}|출고|{{ row[3] }}"></td>
-                <td>{{ row[0] }}</td>
-                <td>{{ row[2] }}</td>
-                <td>{{ row[3] }}</td>
-                <td>{{ row[4] }}</td>
+            <tr><th>✔</th><th>일자</th><th>출고체</th><th>대표제품 외</th><th>수</th></tr>
+            {% for group_key, rows in grouped_outgoing.items() %}
+            {% set date, reason = group_key.split('|') %}
+            <tr onclick="toggleDetail('out{{ loop.index }}')" style="cursor:pointer; background:#fee;">
+                <td></td>
+                <td>{{ date }}</td>
+                <td>{{ reason }}</td>
+                <td>{{ rows[0][3] }} 외 {{ rows|length - 1 }}종</td>
+                <td>{{ rows|length }}</td>
+            </tr>
+            <tr id="detail-out{{ loop.index }}" style="display:none;">
+                <td colspan="5">
+                    <ul>
+                        {% for row in rows %}
+                        <li>{{ row[3] }} - {{ row[4] }}개</li>
+                        {% endfor %}
+                    </ul>
+                </td>
             </tr>
             {% endfor %}
         </table>
         <br>
         <button type="submit">선택 이력 삭제</button>
     </form>
+
+    <script>
+        function toggleDetail(id) {
+            const el = document.getElementById("detail-" + id);
+            el.style.display = el.style.display === "none" ? "table-row" : "none";
+        }
+    </script>
 </body>
 </html>
+
+
 
 
 
