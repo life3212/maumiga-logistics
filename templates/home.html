@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>MAUMIGA LOGISTICS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+            margin: 40px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 30px;
+            color: #222;
+        }
+        .menu a {
+            display: inline-block;
+            margin: 10px;
+            padding: 12px 24px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 16px;
+            color: #333;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        .menu a:hover {
+            background-color: #f0f0f0;
+            border-color: #aaa;
+        }
+        .calendar {
+            margin-top: 50px;
+        }
+        .calendar h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .calendar table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            background-color: #fff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+        .calendar th, .calendar td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            vertical-align: top;
+            height: 120px;
+        }
+        .calendar th {
+            background-color: #f0f0f0;
+            font-size: 13px;
+        }
+        .schedule-display {
+            font-size: 13px;
+            background-color: #f8f8f8;
+            text-align: left;
+            min-height: 70px;
+            padding: 6px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+        }
+        .schedule-input {
+            width: 100%;
+            height: 40px;
+            resize: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 6px;
+            box-sizing: border-box;
+        }
+        .action-buttons {
+            margin-top: 6px;
+        }
+        .action-buttons button {
+            padding: 6px 10px;
+            font-size: 12px;
+            margin-right: 4px;
+            border: none;
+            border-radius: 6px;
+            background-color: #4a90e2;
+            color: #fff;
+            cursor: pointer;
+        }
+        .action-buttons button:hover {
+            background-color: #357ab8;
+        }
+    </style>
+</head>
+<body>
+    <div style="text-align: right;">
+        <span>{{ username }}</span>
+        <a href="/logout" style="margin-left: 10px; color: red; font-size: 14px;">로그아웃</a>
+    </div>
+
+    <h1>MAUMIGA LOGISTICS</h1>
+    <div class="menu">
+        <a href="/product">제품 수불부</a>
+        <a href="/material">부자재 수불부</a>
+    </div>
+
+    <div class="calendar">
+        <h2>📅 이번 주 스케줄</h2>
+        <table>
+            <tr>
+                <th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th><th>일</th>
+            </tr>
+            <tr>
+                {% for day in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] %}
+                <td>
+                    <div class="schedule-display" id="display-{{day}}"></div>
+                    <textarea class="schedule-input" id="input-{{day}}" placeholder="{{ loop.index }}요일 일정"></textarea>
+                    <div class="action-buttons">
+                        <button onclick="saveSchedule('{{day}}')">저장</button>
+                        <button onclick="clearSchedule('{{day}}')">삭제</button>
+                    </div>
+                </td>
+                {% endfor %}
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+
+        function saveSchedule(day) {
+            const value = document.getElementById(`input-${day}`).value;
+            localStorage.setItem(`schedule-${day}`, value);
+            renderSchedule(day);
+        }
+
+        function clearSchedule(day) {
+            localStorage.removeItem(`schedule-${day}`);
+            document.getElementById(`input-${day}`).value = "";
+            renderSchedule(day);
+        }
+
+        function renderSchedule(day) {
+            const value = localStorage.getItem(`schedule-${day}`) || "";
+            document.getElementById(`display-${day}`).innerText = value;
+        }
+
+        window.onload = function() {
+            days.forEach(day => {
+                renderSchedule(day);
+            });
+        };
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+

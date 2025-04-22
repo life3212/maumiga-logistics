@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>부자재 수불부</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            margin: 40px;
+            background-color: #f2f4f8;
+            color: #333;
+        }
+        input, select, button, a.home-button {
+            margin: 5px;
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #2c3e50;
+            color: #fff;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1a242f;
+        }
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 13px;
+            width: 100%;
+            table-layout: fixed;
+            background-color: #fff;
+        }
+        th, td {
+            border: 1px solid #888;
+            padding: 6px;
+            text-align: center;
+            width: 100px;
+        }
+        th {
+            position: sticky;
+            top: 0;
+            background-color: #dfe6ec;
+        }
+        h1, h2, h3 {
+            margin-top: 40px;
+        }
+        .home-button {
+            text-decoration: none;
+            background: #e1e5ea;
+            border: 1px solid #aaa;
+            border-radius: 4px;
+            font-size: 13px;
+            padding: 6px 12px;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div style="text-align: right;">
+        <span>{{ username }}</span>
+        <a href="/logout" style="margin-left: 10px; color: red; font-size: 14px;">로그아웃</a>
+    </div>
+
+    <h1>🧰 부자재 수불부</h1>
+    <a href="/" class="home-button">🏠 홈으로 이동</a>
+
+    <h2>✅ 신규 부자재 등록</h2>
+    <form method="post" action="/material/add">
+        <input type="text" name="name" placeholder="부자재명" required>
+        <input type="number" name="quantity" placeholder="초기 수량" required>
+        <button type="submit">등록</button>
+    </form>
+
+    <h3>📁 신규 부자재 엘셋 업로드</h3>
+    <form method="post" action="/material/upload-new" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".xlsx" required>
+        <button type="submit">신규 부자재 업로드</button>
+    </form>
+    <a href="/download/product-template">📅 신규 부자재 업로드 양식 다운로드 (.xlsx)</a>
+
+    <h3>🗑️ 부자재 삭제</h3>
+    <form method="post" action="/material/delete" onsubmit="return confirm('정말로 이 부자재를 삭제하시겠습니까?')">
+        <select name="name" required>
+            <option value="" disabled selected>삭제할 부자재 선택</option>
+            {% for name, qty in products %}
+            <option value="{{ name }}">{{ name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">삭제</button>
+    </form>
+
+    <h3>📈 재고 현황</h3>
+    <table>
+        {% for i in range(0, products|length, 10) %}
+        <tr>
+            <th>부자재명</th>
+            {% for name, qty in products[i:i+10] %}
+            <th>{{ name }}</th>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>수량</th>
+            {% for name, qty in products[i:i+10] %}
+            <td>{{ "{:,}".format(qty) }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>📅 입고 이력 등록</h2>
+    <form method="post" action="/material/record">
+        <input type="text" name="date" placeholder="일자 (YYYY-MM-DD)" required>
+        <input type="text" name="reason" placeholder="입고처" required>
+        <input type="text" name="name" placeholder="입고 부자재명" required>
+        <input type="number" name="quantity" placeholder="입고 수량" required>
+        <input type="hidden" name="action" value="입고">
+        <button type="submit">입고 등록</button>
+    </form>
+
+    <h2>🚤 출고 이력 등록</h2>
+    <form method="post" action="/material/record">
+        <input type="text" name="date" placeholder="일자 (YYYY-MM-DD)" required>
+        <input type="text" name="reason" placeholder="출고처" required>
+        <input type="text" name="name" placeholder="출고 부자재명" required>
+        <input type="number" name="quantity" placeholder="출고 수량" required>
+        <input type="hidden" name="action" value="출고">
+        <button type="submit">출고 등록</button>
+    </form>
+
+    <h2>📉 입출고 이력 엘셋 업로드</h2>
+    <form method="post" action="/material/upload" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".xlsx" required>
+        <button type="submit">업로드</button>
+        {% if msg %}
+        <p style="color: green">{{ msg }}</p>
+        {% endif %}
+    </form>
+    <a href="/download/template">📅 입출고 업로드 양식 다운로드 (.xlsx)</a>
+
+    <form method="post" action="/material/delete-selected-log" onsubmit="return confirm('선택한 이력을 삭제하시겠습니까?')">
+        <h3>📋 입고 이력</h3>
+        <div>
+            <label>시작일: <input type="date" name="start" value="{{ start }}"></label>
+            <label>종료일: <input type="date" name="end" value="{{ end }}"></label>
+            <button type="submit" formaction="/material">적용</button>
+        </div>
+        <table>
+            <tr><th>✔</th><th>일자</th><th>입고처</th><th>입고부자재</th><th>입고물량</th></tr>
+            {% for row in incoming_logs %}
+            <tr>
+                <td><input type="checkbox" name="logs" value="{{ row[0] }}|입고|{{ row[3] }}"></td>
+                <td>{{ row[0] }}</td>
+                <td>{{ row[2] }}</td>
+                <td>{{ row[3] }}</td>
+                <td>{{ row[4] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <h3>📋 출고 이력</h3>
+        <table>
+            <tr><th>✔</th><th>일자</th><th>출고처</th><th>출고부자재</th><th>출고물량</th></tr>
+            {% for row in outgoing_logs %}
+            <tr>
+                <td><input type="checkbox" name="logs" value="{{ row[0] }}|출고|{{ row[3] }}"></td>
+                <td>{{ row[0] }}</td>
+                <td>{{ row[2] }}</td>
+                <td>{{ row[3] }}</td>
+                <td>{{ row[4] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <br>
+        <button type="submit">선택 이력 삭제</button>
+    </form>
+</body>
+</html>
+
+
+

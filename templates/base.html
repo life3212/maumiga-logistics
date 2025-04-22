@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; }
+        table { border-collapse: collapse; font-size: 13px; }
+        th, td { border: 1px solid #888; padding: 4px 6px; text-align: center; }
+        .form-box { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>{% block header %}{% endblock %}</h1>
+
+    <div class="form-box">
+        <form method="post" action="/{{ category }}/add">
+            <input type="text" name="name" placeholder="제품명" required>
+            <input type="number" name="quantity" placeholder="초기 수량" required>
+            <button type="submit">등록</button>
+        </form>
+    </div>
+
+    <div class="form-box">
+        <form method="post" action="/{{ category }}/record">
+            <input type="text" name="date" placeholder="일자 (YYYY-MM-DD)" required>
+            <select name="action">
+                <option value="입고">입고</option>
+                <option value="출고">출고</option>
+            </select>
+            <input type="text" name="reason" placeholder="사유" required>
+            <input type="text" name="name" placeholder="제품명" required>
+            <input type="number" name="quantity" placeholder="수량" required>
+            <button type="submit">기록</button>
+        </form>
+    </div>
+
+    <hr>
+
+    <h2>📦 현재 재고</h2>
+    <table>
+        <tr>
+            <th>제품명</th>
+            {% for name, qty in products %}
+            <th>{{ name }}</th>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td>수량</td>
+            {% for name, qty in products %}
+            <td>{{ qty }}</td>
+            {% endfor %}
+        </tr>
+    </table>
+
+    <hr>
+
+    <h2>📚 수불 기록</h2>
+    <table>
+        <thead>
+            <tr><th>일자</th><th>입출고</th><th>사유</th><th>제품명</th><th>수량</th></tr>
+        </thead>
+        <tbody>
+            {% for row in logs %}
+            <tr>
+                <td>{{ row[0] }}</td>
+                <td>{{ row[1] }}</td>
+                <td>{{ row[2] }}</td>
+                <td>{{ row[3] }}</td>
+                <td>{{ row[4] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
+
