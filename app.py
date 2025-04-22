@@ -110,10 +110,10 @@ async def view_category(request: Request, category: str, start: str = "", end: s
     incoming_logs = [row for row in logs if str(row[1]).strip() == "입고" and in_range(str(row[0]))]
     outgoing_logs = [row for row in logs if str(row[1]).strip() == "출고" and in_range(str(row[0]))]
 
-    def group_logs(log_list: List[Tuple]) -> Dict[Tuple[str, str], List[Tuple]]:
+    def group_logs(log_list: List[Tuple]) -> Dict[str, List[Tuple]]:
         grouped = defaultdict(list)
         for row in log_list:
-            key = (str(row[0]), str(row[2]))  # 일자, 사유
+            key = f"{row[0]}|{row[2]}"  # 일자|사유
             grouped[key].append(row)
         return dict(grouped)
 
