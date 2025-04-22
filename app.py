@@ -280,7 +280,10 @@ init_excel()
 from starlette.middleware.sessions import SessionMiddleware
 app.add_middleware(SessionMiddleware, secret_key="your-secret-key")
 
-
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))  # Render에서 제공하는 포트
+    uvicorn.run("app:app", host="0.0.0.0", port=port)
 
 
 
