@@ -241,12 +241,16 @@ async def delete_selected_log(category: str, logs: List[str] = Form(...)):
     rows = list(ws.iter_rows(values_only=True))
     header, data = rows[0], rows[1:]
 
-    filtered = []
-    targets = set(tuple(log.split("|")) for log in logs)
+    targets = set()
+    for log in logs:
+        date_part, action, name = log.split("|")
+        for single_date in date_part.split(","):
+            targets.add((single_date.strip(), action, name))
 
     data_wb = openpyxl.load_workbook(FILE_PATHS[category])
     data_ws = data_wb.active
 
+    filtered = []
     for row in data:
         key = (str(row[0]), str(row[1]), str(row[3]))
         if key in targets:
@@ -261,7 +265,6 @@ async def delete_selected_log(category: str, logs: List[str] = Form(...)):
             filtered.append(row)
 
     data_wb.save(FILE_PATHS[category])
-
     new_wb = openpyxl.Workbook()
     new_ws = new_wb.active
     new_ws.append(header)
