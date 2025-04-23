@@ -243,9 +243,14 @@ async def delete_selected_log(category: str, logs: List[str] = Form(...)):
 
     targets = set()
     for log in logs:
-        date_part, action, name = log.split("|")
-        for single_date in date_part.split(","):
-            targets.add((single_date.strip(), action, name))
+        try:
+            parts = log.split("|")
+            if len(parts) != 3:
+                continue  # 잘못된 형식 무시
+            date_part, action, name = parts
+            targets.add((date_part.strip(), action, name))
+        except Exception:
+            continue  # split 실패해도 무시하고 계속
 
     data_wb = openpyxl.load_workbook(FILE_PATHS[category])
     data_ws = data_wb.active
@@ -265,6 +270,7 @@ async def delete_selected_log(category: str, logs: List[str] = Form(...)):
             filtered.append(row)
 
     data_wb.save(FILE_PATHS[category])
+
     new_wb = openpyxl.Workbook()
     new_ws = new_wb.active
     new_ws.append(header)
