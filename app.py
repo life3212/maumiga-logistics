@@ -42,13 +42,13 @@ def init_excel():
             ws = wb.active
             ws.append(["일자", "입출고", "사유", "제품명", "수량"])
             wb.save(LOG_PATHS[key])
-  if not os.path.exists(TEMPLATE_FILE):
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = "입출고양식"
-    ws.append(["일자", "입출고", "사유", "제품명", "수량", "소비기한"])  # 소비기한 추가
-    ws.append(["2025-04-28", "입고", "쿠팡", "콩쑥개떡", 10, "2025-06-30"])  # 예시 데이터 포함
-    wb.save(TEMPLATE_FILE)
+        if not os.path.exists(TEMPLATE_FILE):
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            ws.title = "입출고양식"
+            ws.append(["일자", "입출고", "사유", "제품명", "수량", "소비기한"])  # 소비기한 추가
+            ws.append(["2025-04-28", "입고", "쿠팡", "콩쑥개떡", 10, "2025-06-30"])  # 예시 데이터 포함
+            wb.save(TEMPLATE_FILE)
     if not os.path.exists(PRODUCT_TEMPLATE_FILE):
         wb = openpyxl.Workbook()
         ws = wb.active
