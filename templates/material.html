@@ -149,34 +149,69 @@
             <button type="submit" formaction="/material">적용</button>
         </div>
         <table>
-            <tr><th>✔</th><th>일자</th><th>입고처</th><th>입고부자재</th><th>입고물량</th></tr>
-            {% for row in incoming_logs %}
-            <tr>
-                <td><input type="checkbox" name="logs" value="{{ row[0] }}|입고|{{ row[3] }}"></td>
-                <td>{{ row[0] }}</td>
-                <td>{{ row[2] }}</td>
-                <td>{{ row[3] }}</td>
-                <td>{{ row[4] }}</td>
+            <tr><th>✔</th><th>일자</th><th>입고체</th><th>대표보조재 외</th><th>수</th></tr>
+            {% for group_key, rows in grouped_incoming.items() %}
+            {% set parts = group_key.split('|') %}
+            {% set date = parts[0] %}
+            {% set reason = parts[1] %}
+            <tr style="cursor:pointer; background:#eef;">
+                <td style="cursor:default;">
+                    <input type="checkbox" name="logs" value="{{ rows|map(attribute=0)|join(',') }}|입고|{{ rows[0][3] }}">
+                </td>
+                <td onclick="toggleDetail('in{{ loop.index }}')">{{ date }}</td>
+                <td onclick="toggleDetail('in{{ loop.index }}')">{{ reason }}</td>
+                <td onclick="toggleDetail('in{{ loop.index }}')">{{ rows[0][3] }} 외 {{ rows|length - 1 }}종</td>
+                <td onclick="toggleDetail('in{{ loop.index }}')">{{ rows|length }}</td>
+            </tr>
+            <tr id="detail-in{{ loop.index }}" style="display:none;">
+                <td colspan="5">
+                    <ul>
+                        {% for row in rows %}
+                        <li>{{ row[3] }} - {{ row[4] }}개</li>
+                        {% endfor %}
+                    </ul>
+                </td>
             </tr>
             {% endfor %}
         </table>
-
+    
         <h3>📋 출고 이력</h3>
         <table>
-            <tr><th>✔</th><th>일자</th><th>출고처</th><th>출고부자재</th><th>출고물량</th></tr>
-            {% for row in outgoing_logs %}
-            <tr>
-                <td><input type="checkbox" name="logs" value="{{ row[0] }}|출고|{{ row[3] }}"></td>
-                <td>{{ row[0] }}</td>
-                <td>{{ row[2] }}</td>
-                <td>{{ row[3] }}</td>
-                <td>{{ row[4] }}</td>
+            <tr><th>✔</th><th>일자</th><th>출고체</th><th>대표보조재 외</th><th>수</th></tr>
+            {% for group_key, rows in grouped_outgoing.items() %}
+            {% set parts = group_key.split('|') %}
+            {% set date = parts[0] %}
+            {% set reason = parts[1] %}
+            <tr style="cursor:pointer; background:#fee;">
+                <td style="cursor:default;">
+                    <input type="checkbox" name="logs" value="{{ rows|map(attribute=0)|join(',') }}|출고|{{ rows[0][3] }}">
+                </td>
+                <td onclick="toggleDetail('out{{ loop.index }}')">{{ date }}</td>
+                <td onclick="toggleDetail('out{{ loop.index }}')">{{ reason }}</td>
+                <td onclick="toggleDetail('out{{ loop.index }}')">{{ rows[0][3] }} 외 {{ rows|length - 1 }}종</td>
+                <td onclick="toggleDetail('out{{ loop.index }}')">{{ rows|length }}</td>
+            </tr>
+            <tr id="detail-out{{ loop.index }}" style="display:none;">
+                <td colspan="5">
+                    <ul>
+                        {% for row in rows %}
+                        <li>{{ row[3] }} - {{ row[4] }}개</li>
+                        {% endfor %}
+                    </ul>
+                </td>
             </tr>
             {% endfor %}
         </table>
         <br>
         <button type="submit">선택 이력 삭제</button>
     </form>
+    
+    <script>
+    function toggleDetail(id) {
+        const el = document.getElementById("detail-" + id);
+        el.style.display = el.style.display === "none" ? "table-row" : "none";
+    }
+    </script>
 </body>
 </html>
 
