@@ -249,7 +249,7 @@ async def delete_selected_log(category: str, logs: List[str] = Form(...)):
                 continue  # 잘못된 형식 무시
             date_part, action, name = parts
             for single_date in date_part.split(","):
-                targets.add((single_part.strip(), action, name))
+                targets.add((single_date.strip(), action, name))
         except Exception:
             continue  # split 실패해도 무시하고 계속
 
