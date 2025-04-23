@@ -78,7 +78,7 @@
         <button type="submit">등록</button>
     </form>
 
-    <h3>📁 시작 제품 엘셀 업로드</h3>
+    <h3>📁 시작 제품 엑셀 업로드</h3>
     <form method="post" action="/product/upload-new" enctype="multipart/form-data">
         <input type="file" name="file" accept=".xlsx" required>
         <button type="submit">신규 제품 업로드</button>
@@ -134,7 +134,7 @@
         <button type="submit">출고 등록</button>
     </form>
 
-    <h2>📁 입출고 이력 엘셀 업로드</h2>
+    <h2>📁 입출고 이력 엑셀 업로드</h2>
     <form method="post" action="/product/upload" enctype="multipart/form-data">
         <input type="file" name="file" accept=".xlsx" required>
         <button type="submit">엑셀 업로드</button>
@@ -150,23 +150,26 @@
             {% set parts = group_key.split('|') %}
             {% set date = parts[0] %}
             {% set reason = parts[1] %}
-            <tr onclick="toggleDetail('in{{ loop.index }}')" style="cursor:pointer; background:#eef;">
-                <td></td>
-                <td>{{ date }}</td>
-                <td>{{ reason }}</td>
-                <td>{{ rows[0][3] }} 외 {{ rows|length - 1 }}종</td>
-                <td>{{ rows|length }}</td>
+            <tr style="cursor:pointer; background:#eef;">
+                <td style="cursor:default;">
+                    <input type="checkbox" name="logs" value="{{ rows|map(attribute=0)|join('|') }}|입고|{{ rows[0][3] }}">
+                </td>
+                <td onclick="toggleDetail('in{{ loop.index }}')">{{ date }}</td>
+                <td onclick="toggleDetail('in{{ loop.index }}')">{{ reason }}</td>
+                <td onclick="toggleDetail('in{{ loop.index }}')">{{ rows[0][3] }} 외 {{ rows|length - 1 }}종</td>
+                <td onclick="toggleDetail('in{{ loop.index }}')">{{ rows|length }}</td>
             </tr>
             <tr id="detail-in{{ loop.index }}" style="display:none;">
                 <td colspan="5">
                     <ul>
                         {% for row in rows %}
-                        <li>{{ row[3] }} - {{ row[4] }}개</li>
+                        <li>{{ row[3] }} - {{ row[4] }}개{% if row|length > 5 %} (소비기한: {{ row[5] }}){% endif %}</li>
                         {% endfor %}
                     </ul>
                 </td>
             </tr>
             {% endfor %}
+            
         </table>
 
         <h3>📋 출고 이력</h3>
@@ -176,18 +179,20 @@
             {% set parts = group_key.split('|') %}
             {% set date = parts[0] %}
             {% set reason = parts[1] %}
-            <tr onclick="toggleDetail('out{{ loop.index }}')" style="cursor:pointer; background:#fee;">
-                <td></td>
-                <td>{{ date }}</td>
-                <td>{{ reason }}</td>
-                <td>{{ rows[0][3] }} 외 {{ rows|length - 1 }}종</td>
-                <td>{{ rows|length }}</td>
+            <tr style="cursor:pointer; background:#fee;">
+                <td style="cursor:default;">
+                    <input type="checkbox" name="logs" value="{{ rows|map(attribute=0)|join('|') }}|출고|{{ rows[0][3] }}">
+                </td>
+                <td onclick="toggleDetail('out{{ loop.index }}')">{{ date }}</td>
+                <td onclick="toggleDetail('out{{ loop.index }}')">{{ reason }}</td>
+                <td onclick="toggleDetail('out{{ loop.index }}')">{{ rows[0][3] }} 외 {{ rows|length - 1 }}종</td>
+                <td onclick="toggleDetail('out{{ loop.index }}')">{{ rows|length }}</td>
             </tr>
             <tr id="detail-out{{ loop.index }}" style="display:none;">
                 <td colspan="5">
                     <ul>
                         {% for row in rows %}
-                        <li>{{ row[3] }} - {{ row[4] }}개</li>
+                        <li>{{ row[3] }} - {{ row[4] }}개{% if row|length > 5 %} (소비기한: {{ row[5] }}){% endif %}</li>
                         {% endfor %}
                     </ul>
                 </td>

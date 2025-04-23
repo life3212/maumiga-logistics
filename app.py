@@ -42,13 +42,13 @@ def init_excel():
             ws = wb.active
             ws.append(["일자", "입출고", "사유", "제품명", "수량"])
             wb.save(LOG_PATHS[key])
-    if not os.path.exists(TEMPLATE_FILE):
-        wb = openpyxl.Workbook()
-        ws = wb.active
-        ws.title = "입출고양식"
-        ws.append(["일자", "입출고", "사유", "제품명", "수량"])
-        ws.append(["2025-04-28", "입고", "쿠팡", "콩쑥개떡", 10])
-        wb.save(TEMPLATE_FILE)
+  if not os.path.exists(TEMPLATE_FILE):
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "입출고양식"
+    ws.append(["일자", "입출고", "사유", "제품명", "수량", "소비기한"])  # 소비기한 추가
+    ws.append(["2025-04-28", "입고", "쿠팡", "콩쑥개떡", 10, "2025-06-30"])  # 예시 데이터 포함
+    wb.save(TEMPLATE_FILE)
     if not os.path.exists(PRODUCT_TEMPLATE_FILE):
         wb = openpyxl.Workbook()
         ws = wb.active
@@ -158,7 +158,7 @@ async def delete_product(category: str, name: str = Form(...)):
     return RedirectResponse(f"/{category}", status_code=303)
 
 @app.post("/{category}/record")
-async def record_entry(category: str, date: str = Form(...), action: str = Form(...), reason: str = Form(...), name: str = Form(...), quantity: int = Form(...)):
+async def record_entry(category: str, date: str = Form(...), action: str = Form(...), reason: str = Form(...), name: str = Form(...), quantity: int = Form(...), expire: str = Form("")):
     wb = openpyxl.load_workbook(FILE_PATHS[category])
     ws = wb.active
     for row in ws.iter_rows(min_row=2):
@@ -170,7 +170,7 @@ async def record_entry(category: str, date: str = Form(...), action: str = Form(
 
     log_wb = openpyxl.load_workbook(LOG_PATHS[category])
     log_ws = log_wb.active
-    log_ws.append([date, action, reason, name, quantity])
+    log_ws.append([date, action, reason, name, quantity, expire])
     log_wb.save(LOG_PATHS[category])
 
     return RedirectResponse(f"/{category}", status_code=303)
@@ -184,7 +184,11 @@ async def upload_excel(category: str, file: UploadFile = File(...)):
     wb = openpyxl.load_workbook(temp_path)
     ws = wb.active
     for row in ws.iter_rows(min_row=2, values_only=True):
-        date, action, reason, name, quantity = row
+        if len(row) < 6:
+            date, action, reason, name, quantity = row
+            expire = ""
+        else:
+            date, action, reason, name, quantity, expire = row
 
         data_wb = openpyxl.load_workbook(FILE_PATHS[category])
         data_ws = data_wb.active
@@ -197,7 +201,7 @@ async def upload_excel(category: str, file: UploadFile = File(...)):
 
         log_wb = openpyxl.load_workbook(LOG_PATHS[category])
         log_ws = log_wb.active
-        log_ws.append([date, action, reason, name, quantity])
+        log_ws.append([date, action, reason, name, quantity, expire])
         log_wb.save(LOG_PATHS[category])
 
     os.remove(temp_path)
