@@ -152,9 +152,7 @@
             {% set reason = parts[1] %}
             <tr style="cursor:pointer; background:#eef;">
                 <td style="cursor:default;">
-                    {% for row in rows %}
                     <input type="checkbox" name="logs" value="{{ rows|map(attribute=0)|join('|') }}|입고|{{ rows[0][3] }}">
-                    {% endfor %}
                 </td>
                 <td onclick="toggleDetail('in{{ loop.index }}')">{{ date }}</td>
                 <td onclick="toggleDetail('in{{ loop.index }}')">{{ reason }}</td>
@@ -183,9 +181,7 @@
             {% set reason = parts[1] %}
             <tr style="cursor:pointer; background:#fee;">
                 <td style="cursor:default;">
-                    {% for row in rows %}
                     <input type="checkbox" name="logs" value="{{ rows|map(attribute=0)|join('|') }}|출고|{{ rows[0][3] }}">
-                    {% endfor %}
                 </td>
                 <td onclick="toggleDetail('out{{ loop.index }}')">{{ date }}</td>
                 <td onclick="toggleDetail('out{{ loop.index }}')">{{ reason }}</td>
