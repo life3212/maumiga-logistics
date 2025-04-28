@@ -51,9 +51,9 @@
         }
         .calendar th, .calendar td {
             border: 1px solid #ddd;
-            padding: 6px;
+            padding: 8px;
             vertical-align: top;
-            height: 160px;
+            height: 200px;
         }
         .calendar th {
             background-color: #f0f0f0;
@@ -63,26 +63,25 @@
             font-size: 13px;
             background-color: #f8f8f8;
             text-align: left;
-            min-height: 100px;
-            padding: 6px;
+            min-height: 80px;
+            padding: 8px;
             border-radius: 4px;
             margin-bottom: 6px;
-            overflow-y: auto;
         }
-        .schedule-section {
-            margin-bottom: 4px;
-            font-weight: bold;
-        }
-        .schedule-input {
+        .schedule-input, .schedule-select {
             width: 100%;
-            height: 80px;
-            resize: none;
+            margin-top: 6px;
+            margin-bottom: 6px;
             font-family: 'Inter', sans-serif;
             font-size: 13px;
             border: 1px solid #ccc;
             border-radius: 6px;
-            padding: 6px;
+            padding: 8px;
             box-sizing: border-box;
+        }
+        .schedule-input {
+            height: 60px;
+            resize: none;
         }
         .action-buttons {
             margin-top: 6px;
@@ -123,11 +122,18 @@
             <tr>
                 {% for day in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] %}
                 <td>
-                    <div class="schedule-display" id="display-{{day}}"></div>
+                    <div class="schedule-display" id="display-{{day}}-입고">입고</div>
+                    <div class="schedule-display" id="display-{{day}}-출고">출고</div>
+                    <div class="schedule-display" id="display-{{day}}-기타">기타</div>
+                    <select class="schedule-select" id="category-{{day}}">
+                        <option value="입고">입고</option>
+                        <option value="출고">출고</option>
+                        <option value="기타">기타</option>
+                    </select>
                     <textarea class="schedule-input" id="input-{{day}}" placeholder="{{ loop.index }}요일 일정"></textarea>
                     <div class="action-buttons">
-                        <button type="button" onclick="saveSchedule('{{day}}')">저장</button>
-                        <button type="button" onclick="clearSchedule('{{day}}')">삭제</button>
+                        <button onclick="saveSchedule('{{day}}')">저장</button>
+                        <button onclick="clearSchedule('{{day}}')">삭제</button>
                     </div>
                 </td>
                 {% endfor %}
@@ -139,64 +145,36 @@
         const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 
         function saveSchedule(day) {
-            const value = document.getElementById(`input-${day}`).value;
-            localStorage.setItem(`schedule-${day}`, value);
+            const category = document.getElementById(`category-${day}`).value;
+            const input = document.getElementById(`input-${day}`).value;
+            if (input.trim()) {
+                localStorage.setItem(`schedule-${day}-${category}`, input);
+            }
             renderSchedule(day);
         }
 
         function clearSchedule(day) {
-            localStorage.removeItem(`schedule-${day}`);
+            const category = document.getElementById(`category-${day}`).value;
+            localStorage.removeItem(`schedule-${day}-${category}`);
             document.getElementById(`input-${day}`).value = "";
             renderSchedule(day);
         }
 
         function renderSchedule(day) {
-            const container = document.getElementById(`display-${day}`);
-            container.innerHTML = ""; // 초기화
-            const value = localStorage.getItem(`schedule-${day}`) || "";
+            ["입고", "출고", "기타"].forEach(category => {
+                const value = localStorage.getItem(`schedule-${day}-${category}`) || "";
+                document.getElementById(`display-${day}-${category}`).innerText = category + (value ? `: ${value}` : "");
+            });
+        }
 
-            const lines = value.split('\n').filter(line => line.trim() !== "");
-            const incoming = [];
-            const outgoing = [];
-            const other = [];
-
-            for (const line of lines) {
-                if (line.startsWith("입고")) incoming.push(line);
-                else if (line.startsWith("출고")) outgoing.push(line);
-                else other.push(line);
-            }
-
-            if (incoming.length) {
-                const div = document.createElement("div");
-                div.className = "schedule-section";
-                div.textContent = "📥 입고";
-                container.appendChild(div);
-                incoming.forEach(item => {
-                    const p = document.createElement("p");
-                    p.textContent = item;
-                    container.appendChild(p);
-                });
-            }
-            if (outgoing.length) {
-                const div = document.createElement("div");
-                div.className = "schedule-section";
-                div.textContent = "📤 출고";
-                container.appendChild(div);
-                outgoing.forEach(item => {
-                    const p = document.createElement("p");
-                    p.textContent = item;
-                    container.appendChild(p);
-                });
-            }
-            if (other.length) {
-                const div = document.createElement("div");
-                div.className = "schedule-section";
-                div.textContent = "📝 기타";
-                container.appendChild(div);
-                other.forEach(item => {
-                    const p = document.createElement("p");
-                    p.textContent = item;
-                    container.appendChild(p);
+        window.onload = function() {
+            days.forEach(day => {
+                renderSchedule(day);
+            });
+        };
+    </script>
+</body>
+</html>
                 });
             }
         }
