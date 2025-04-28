@@ -53,7 +53,7 @@
             border: 1px solid #ddd;
             padding: 6px;
             vertical-align: top;
-            height: 120px;
+            height: 160px;
         }
         .calendar th {
             background-color: #f0f0f0;
@@ -63,14 +63,19 @@
             font-size: 13px;
             background-color: #f8f8f8;
             text-align: left;
-            min-height: 70px;
+            min-height: 100px;
             padding: 6px;
             border-radius: 4px;
             margin-bottom: 6px;
+            overflow-y: auto;
+        }
+        .schedule-section {
+            margin-bottom: 4px;
+            font-weight: bold;
         }
         .schedule-input {
             width: 100%;
-            height: 40px;
+            height: 80px;
             resize: none;
             font-family: 'Inter', sans-serif;
             font-size: 13px;
@@ -121,8 +126,8 @@
                     <div class="schedule-display" id="display-{{day}}"></div>
                     <textarea class="schedule-input" id="input-{{day}}" placeholder="{{ loop.index }}요일 일정"></textarea>
                     <div class="action-buttons">
-                        <button onclick="saveSchedule('{{day}}')">저장</button>
-                        <button onclick="clearSchedule('{{day}}')">삭제</button>
+                        <button type="button" onclick="saveSchedule('{{day}}')">저장</button>
+                        <button type="button" onclick="clearSchedule('{{day}}')">삭제</button>
                     </div>
                 </td>
                 {% endfor %}
@@ -146,8 +151,54 @@
         }
 
         function renderSchedule(day) {
+            const container = document.getElementById(`display-${day}`);
+            container.innerHTML = ""; // 초기화
             const value = localStorage.getItem(`schedule-${day}`) || "";
-            document.getElementById(`display-${day}`).innerText = value;
+
+            const lines = value.split('\n').filter(line => line.trim() !== "");
+            const incoming = [];
+            const outgoing = [];
+            const other = [];
+
+            for (const line of lines) {
+                if (line.startsWith("입고")) incoming.push(line);
+                else if (line.startsWith("출고")) outgoing.push(line);
+                else other.push(line);
+            }
+
+            if (incoming.length) {
+                const div = document.createElement("div");
+                div.className = "schedule-section";
+                div.textContent = "📥 입고";
+                container.appendChild(div);
+                incoming.forEach(item => {
+                    const p = document.createElement("p");
+                    p.textContent = item;
+                    container.appendChild(p);
+                });
+            }
+            if (outgoing.length) {
+                const div = document.createElement("div");
+                div.className = "schedule-section";
+                div.textContent = "📤 출고";
+                container.appendChild(div);
+                outgoing.forEach(item => {
+                    const p = document.createElement("p");
+                    p.textContent = item;
+                    container.appendChild(p);
+                });
+            }
+            if (other.length) {
+                const div = document.createElement("div");
+                div.className = "schedule-section";
+                div.textContent = "📝 기타";
+                container.appendChild(div);
+                other.forEach(item => {
+                    const p = document.createElement("p");
+                    p.textContent = item;
+                    container.appendChild(p);
+                });
+            }
         }
 
         window.onload = function() {
