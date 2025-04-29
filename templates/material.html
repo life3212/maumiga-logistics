@@ -110,6 +110,9 @@
         </tr>
         {% endfor %}
     </table>
+    <form method="post" action="/material/delete-all" onsubmit="return confirm('정말로 전체 재고를 삭제하시겠습니까?')">
+        <button type="submit" style="margin-top: 10px; background-color: #c0392b;">🧹 전체 재고 삭제</button>
+    </form>
 
     <h2>📅 입고 이력 등록</h2>
     <form method="post" action="/material/record">

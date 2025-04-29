@@ -281,6 +281,19 @@ async def delete_selected_log(category: str, logs: List[str] = Form(...)):
 
     return RedirectResponse(f"/{category}", status_code=303)
 
+@app.post("/{category}/delete-all")
+async def delete_all_products(category: str):
+    if category not in FILE_PATHS:
+        raise HTTPException(status_code=404, detail="❌ 잘못된 카테고리")
+    
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.append(["제품명", "재고수량"])
+    wb.save(FILE_PATHS[category])
+
+    return RedirectResponse(f"/{category}?msg=✅ 전체 재고 삭제 완료", status_code=303)
+
+
 @app.get("/download/template")
 async def download_template():
     return FileResponse(TEMPLATE_FILE, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", filename="입출고_업로드_양식.xlsx")
