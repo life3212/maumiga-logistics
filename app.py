@@ -84,7 +84,18 @@ async def home(request: Request, username: str = Depends(get_current_user)):
     return templates.TemplateResponse("home.html", {"request": request, "username": username})
 
 @app.get("/{category}", response_class=HTMLResponse)
-async def view_category(request: Request, category: str, start: str = "", end: str = "", msg: str = "", username: str = Depends(get_current_user)):
+async def view_category(
+    request: Request,
+    category: str,
+    start: str = "",
+    end: str = "",
+    msg: str = "",
+    reason_filter_in: str = "",
+    reason_filter_out: str = "",
+    page_in: int = 1,
+    page_out: int = 1,
+    username: str = Depends(get_current_user)
+):
     if category not in FILE_PATHS:
         return HTMLResponse("❌ 수불부 종류 오류", status_code=404)
 
@@ -117,20 +128,46 @@ async def view_category(request: Request, category: str, start: str = "", end: s
             grouped[key].append(row)
         return dict(grouped)
 
-    grouped_incoming = group_logs(incoming_logs)
-    grouped_outgoing = group_logs(outgoing_logs)
+    grouped_incoming_all = group_logs(incoming_logs)
+    grouped_outgoing_all = group_logs(outgoing_logs)
+
+    grouped_incoming = {k: v for k, v in grouped_incoming_all.items() if reason_filter_in in ("", k.split("|")[1])}
+    grouped_outgoing = {k: v for k, v in grouped_outgoing_all.items() if reason_filter_out in ("", k.split("|")[1])}
+
+    def paginate(dict_items, page):
+        items = list(dict_items.items())
+        per_page = 10
+        start = (page - 1) * per_page
+        end = start + per_page
+        total_pages = (len(items) + per_page - 1) // per_page
+        return items[start:end], total_pages
+
+    incoming_page_data, total_pages_in = paginate(grouped_incoming, page_in)
+    outgoing_page_data, total_pages_out = paginate(grouped_outgoing, page_out)
+
+    incoming_reasons = sorted(set(row[2] for row in incoming_logs))
+    outgoing_reasons = sorted(set(row[2] for row in outgoing_logs))
 
     return templates.TemplateResponse(f"{category}.html", {
         "request": request,
         "category": category,
         "products": products,
-        "grouped_incoming": grouped_incoming,
-        "grouped_outgoing": grouped_outgoing,
+        "grouped_incoming": dict(incoming_page_data),
+        "grouped_outgoing": dict(outgoing_page_data),
         "msg": msg,
         "start": start,
         "end": end,
-        "username": username
+        "username": username,
+        "selected_reason_in": reason_filter_in,
+        "selected_reason_out": reason_filter_out,
+        "incoming_reasons": incoming_reasons,
+        "outgoing_reasons": outgoing_reasons,
+        "page_in": page_in,
+        "page_out": page_out,
+        "total_pages_in": total_pages_in,
+        "total_pages_out": total_pages_out
     })
+
 
 @app.post("/{category}/add")
 async def add_product(category: str, name: str = Form(...), quantity: int = Form(...)):
