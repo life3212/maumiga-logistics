@@ -119,115 +119,25 @@
         </button>
     </form>
 
-    <h3>📋 입고 이력</h3>
+    <h2>📅 입고 이력</h2>
+    <form method="post" action="/product/record">
+        <input type="text" name="date" placeholder="일자 (YYYY-MM-DD)" required>
+        <input type="text" name="reason" placeholder="입고처" required>
+        <input type="text" name="name" placeholder="입고 제품명" required>
+        <input type="number" name="quantity" placeholder="입고 수량" required>
+        <input type="hidden" name="action" value="입고">
+        <button type="submit">입고 등록</button>
+    </form>
 
-<form method="get" style="margin-bottom:10px;">
-    <label for="reason_filter_in">입고처:</label>
-    <select id="reason_filter_in" name="reason_filter_in" onchange="this.form.submit()">
-        <option value="">전체</option>
-        {% for reason in incoming_reasons %}
-        <option value="{{ reason }}" {% if reason == selected_reason_in %}selected{% endif %}>{{ reason }}</option>
-        {% endfor %}
-    </select>
-    <input type="hidden" name="page_out" value="{{ page_out }}">
-    <input type="hidden" name="reason_filter_out" value="{{ selected_reason_out }}">
-</form>
-
-<table>
-    <tr><th>✔</th><th>일자</th><th>입고처</th><th>대표제품 외</th><th>수</th></tr>
-    {% for group_key, rows in grouped_incoming.items() %}
-    {% set parts = group_key.split('|') %}
-    {% set date = parts[0] %}
-    {% set reason = parts[1] %}
-    <tr style="cursor:pointer; background:#eef;">
-        <td style="cursor:default;">
-            <input type="checkbox" name="logs" value="{{ rows[0][0] }}|입고|{{ rows[0][3] }}">
-        </td>
-        <td onclick="toggleDetail('in{{ loop.index }}')">{{ date }}</td>
-        <td onclick="toggleDetail('in{{ loop.index }}')">{{ reason }}</td>
-        <td onclick="toggleDetail('in{{ loop.index }}')">{{ rows[0][3] }} 외 {{ rows|length - 1 }}종</td>
-        <td onclick="toggleDetail('in{{ loop.index }}')">{{ rows|length }}</td>
-    </tr>
-    <tr id="detail-in{{ loop.index }}" style="display:none;">
-        <td colspan="5">
-            <ul>
-                {% for row in rows %}
-                <li>{{ row[3] }} - {{ row[4] }}개{% if row|length > 5 %} (소비기한: {{ row[5] }}){% endif %}</li>
-                {% endfor %}
-            </ul>
-        </td>
-    </tr>
-    {% endfor %}
-</table>
-
-<div style="text-align:center; margin-top: 10px;">
-    {% if page_in > 1 %}
-        <a href="?page_in={{ page_in - 1 }}&reason_filter_in={{ selected_reason_in }}&page_out={{ page_out }}&reason_filter_out={{ selected_reason_out }}">← 이전</a>
-    {% endif %}
-    {{ page_in }}/{{ total_pages_in }}
-    {% if page_in < total_pages_in %}
-        <a href="?page_in={{ page_in + 1 }}&reason_filter_in={{ selected_reason_in }}&page_out={{ page_out }}&reason_filter_out={{ selected_reason_out }}">다음 →</a>
-    {% endif %}
-</div>
-
-<h3>📋 출고 이력</h3>
-
-<form method="get" style="margin-bottom:10px;">
-    <label for="reason_filter_out">출고처:</label>
-    <select id="reason_filter_out" name="reason_filter_out" onchange="this.form.submit()">
-        <option value="">전체</option>
-        {% for reason in outgoing_reasons %}
-        <option value="{{ reason }}" {% if reason == selected_reason_out %}selected{% endif %}>{{ reason }}</option>
-        {% endfor %}
-    </select>
-    <input type="hidden" name="page_in" value="{{ page_in }}">
-    <input type="hidden" name="reason_filter_in" value="{{ selected_reason_in }}">
-</form>
-
-<table>
-    <tr><th>✔</th><th>일자</th><th>출고처</th><th>대표제품 외</th><th>수</th></tr>
-    {% for group_key, rows in grouped_outgoing.items() %}
-    {% set parts = group_key.split('|') %}
-    {% set date = parts[0] %}
-    {% set reason = parts[1] %}
-    <tr style="cursor:pointer; background:#fee;">
-        <td style="cursor:default;">
-            <input type="checkbox" name="logs" value="{{ rows[0][0] }}|출고|{{ rows[0][3] }}">
-        </td>
-        <td onclick="toggleDetail('out{{ loop.index }}')">{{ date }}</td>
-        <td onclick="toggleDetail('out{{ loop.index }}')">{{ reason }}</td>
-        <td onclick="toggleDetail('out{{ loop.index }}')">{{ rows[0][3] }} 외 {{ rows|length - 1 }}종</td>
-        <td onclick="toggleDetail('out{{ loop.index }}')">{{ rows|length }}</td>
-    </tr>
-    <tr id="detail-out{{ loop.index }}" style="display:none;">
-        <td colspan="5">
-            <ul>
-                {% for row in rows %}
-                <li>{{ row[3] }} - {{ row[4] }}개{% if row|length > 5 %} (소비기한: {{ row[5] }}){% endif %}</li>
-                {% endfor %}
-            </ul>
-        </td>
-    </tr>
-    {% endfor %}
-</table>
-
-<div style="text-align:center; margin-top: 10px;">
-    {% if page_out > 1 %}
-        <a href="?page_out={{ page_out - 1 }}&reason_filter_out={{ selected_reason_out }}&page_in={{ page_in }}&reason_filter_in={{ selected_reason_in }}">← 이전</a>
-    {% endif %}
-    {{ page_out }}/{{ total_pages_out }}
-    {% if page_out < total_pages_out %}
-        <a href="?page_out={{ page_out + 1 }}&reason_filter_out={{ selected_reason_out }}&page_in={{ page_in }}&reason_filter_in={{ selected_reason_in }}">다음 →</a>
-    {% endif %}
-</div>
-
-<script>
-    function toggleDetail(id) {
-        const el = document.getElementById("detail-" + id);
-        el.style.display = el.style.display === "none" ? "table-row" : "none";
-    }
-</script>
-
+    <h2>📤 출고 이력</h2>
+    <form method="post" action="/product/record">
+        <input type="text" name="date" placeholder="일자 (YYYY-MM-DD)" required>
+        <input type="text" name="reason" placeholder="출고처" required>
+        <input type="text" name="name" placeholder="출고 제품명" required>
+        <input type="number" name="quantity" placeholder="출고 수량" required>
+        <input type="hidden" name="action" value="출고">
+        <button type="submit">출고 등록</button>
+    </form>
 
     <h2>📁 입출고 이력 엑셀 업로드</h2>
     <form method="post" action="/product/upload" enctype="multipart/form-data">
